@@ -1,0 +1,61 @@
+openapi: 3.0.3
+info:
+  title: BIT Dokumen Service API
+  description: Dokumen service API for isolated file upload, magic bytes validation, ClamAV antivirus scanning, and secure access.
+  version: 0.1.0
+paths:
+  /health/live:
+    get:
+      summary: Liveness probe
+      responses:
+        '200': { description: OK }
+  /health/ready:
+    get:
+      summary: Readiness probe (Database & ClamAV daemon)
+      responses:
+        '200': { description: Ready }
+        '503': { description: Unhealthy }
+  /api/v1/documents:
+    post:
+      summary: Upload document with reservationId
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file, reservationId]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                reservationId:
+                  type: string
+      responses:
+        '201': { description: File uploaded, scanned, and bound }
+        '400': { description: Invalid magic bytes or format mismatch }
+        '413': { description: File exceeds maximum allowed bytes (2 MB) }
+        '422': { description: Antivirus detected malicious payload or scan failed }
+  /api/v1/documents/{id}:
+    get:
+      summary: Get document metadata
+      responses:
+        '200': { description: Document metadata }
+        '404': { description: Not found }
+  /api/v1/documents/{id}/content:
+    get:
+      summary: Stream private document content (authorized only)
+      responses:
+        '200':
+          description: Binary file stream with Content-Disposition attachment/inline
+        '403': { description: Unauthorized to view document }
+  /internal/v1/document/documents/status:
+    get:
+      summary: Internal check on scan/binding status for application submission
+      parameters:
+        - name: documentId
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Document status (CLEAN, QUARANTINED, REJECTED) }
