@@ -5,6 +5,7 @@ import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import { env } from './config/env.js';
 import { healthRouter } from './modules/health/health.controller.js';
+import { documentRouter } from './modules/documents/document.routes.js';
 import { errorHandler } from './middleware/error-handler.js';
 import { requestId } from './middleware/request-id.js';
 
@@ -19,7 +20,8 @@ app.use(requestId);
 
 app.use('/health', healthRouter);
 
-// TODO: Fase 5 — Document upload, scan, storage
+// Document upload, scan, and download endpoints (Fase 5)
+app.use('/api/v1/documents', documentRouter);
 
 app.use(errorHandler);
 

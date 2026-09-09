@@ -7,7 +7,7 @@ export function getPool(): Pool {
   if (!pool) {
     pool = new pg.Pool({
       connectionString: env.DATABASE_URL,
-      max: 10,
+      max: env.DB_POOL_LIMIT,
       connectionTimeoutMillis: 5000,
       idleTimeoutMillis: 30000
     });
