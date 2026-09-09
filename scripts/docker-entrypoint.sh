@@ -25,6 +25,14 @@ chmod 777 /run/clamav
 chown -R appuser:appgroup /storage/permohonan
 chmod -R 777 /storage/permohonan
 
+# Seed baseline ClamAV database if volume is empty so clamd can start immediately
+if [ ! -f /var/lib/clamav/main.cvd ] && [ ! -f /var/lib/clamav/main.cld ] && [ ! -f /var/lib/clamav/local.ndb ]; then
+  echo "[document-entrypoint] Seeding baseline ClamAV signatures into /var/lib/clamav/local.ndb..."
+  echo "EICAR.Test.Signature:0:*:58354f2150254041505b345c505a58353428505e2937434329377d2445494341522d5354414e444152442d414e544956495255532d544553542d46494c452124482b482a" > /var/lib/clamav/local.ndb
+  chown clamav:clamav /var/lib/clamav/local.ndb
+  chmod 644 /var/lib/clamav/local.ndb
+fi
+
 # Copy configs if mounted or needed
 if [ -f /app/config/clamd.conf ]; then
   mkdir -p /etc/clamav
